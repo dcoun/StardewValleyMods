@@ -1,0 +1,9 @@
+{
+  "Name": "Food Buff Stack",
+  "Author": "dcoun08",
+  "Version": "1.0.0",
+  "Description": "Allows for buffs to stack",
+  "UniqueID": "dcoun08.foodbuffstack",
+  "EntryDll": "FoodBuffStack.dll",
+  "MinimumApiVersion": "4.0.0"
+}
