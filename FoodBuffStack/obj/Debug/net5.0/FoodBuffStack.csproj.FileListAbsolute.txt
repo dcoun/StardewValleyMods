@@ -1,0 +1,8 @@
+G:\Github\StardewValleyMods\FoodBuffStack\obj\Debug\net5.0\FoodBuffStack.csproj.AssemblyReference.cache
+G:\Github\StardewValleyMods\FoodBuffStack\obj\Debug\net5.0\FoodBuffStack.GeneratedMSBuildEditorConfig.editorconfig
+G:\Github\StardewValleyMods\FoodBuffStack\obj\Debug\net5.0\FoodBuffStack.AssemblyInfoInputs.cache
+G:\Github\StardewValleyMods\FoodBuffStack\obj\Debug\net5.0\FoodBuffStack.AssemblyInfo.cs
+G:\Github\StardewValleyMods\FoodBuffStack\obj\Debug\net5.0\FoodBuffStack.csproj.CoreCompileInputs.cache
+G:\Github\StardewValleyMods\FoodBuffStack\bin\Debug\net5.0\FoodBuffStack.deps.json
+G:\Github\StardewValleyMods\FoodBuffStack\bin\Debug\net5.0\FoodBuffStack.dll
+G:\Github\StardewValleyMods\FoodBuffStack\obj\Debug\net5.0\FoodBuffStack.dll

@@ -1,40 +1,75 @@
-﻿using System;
+using System;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
+using Newtonsoft;
 
 namespace FoodBuffStack
 {
-    /// <summary>The mod entry point.</summary>
-    public class ModEntry : Mod
+  public class ModEntry : Mod
+  {
+    private static ModConfig Config;
+    private static Buff PrevFood;
+    private static Buff PrevDrink;
+
+    public override void Entry(IModHelper helper)
     {
-        /*********
-        ** Public methods
-        *********/
-        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
-        /// <param name="helper">Provides simplified APIs for writing mods.</param>
-        public override void Entry(IModHelper helper)
-        {
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-        }
-
-
-        /*********
-        ** Private methods
-        *********/
-        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event data.</param>
-        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
-        {
-            // ignore if player hasn't loaded a save yet
-            if (!Context.IsWorldReady)
-                return;
-
-            // print button presses to the console window
-            this.Monitor.Log($"{Game1.player.Name} pressed {e.Button}.", LogLevel.Debug);
-        }
+      Config = this.Helper.ReadConfig<ModConfig>();
+      helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
     }
+
+    private bool isSameSource(Buff newBuff, Buff oldBuff)
+    {
+      return newBuff.source == oldBuff.source;
+    }
+
+    private bool isNewSource(Buff newBuff, Buff oldBuff)
+    {
+      boolean isSameSource = isSameSource(newBuff, oldBuff);
+      if (!isSameSource)
+      {
+        return true;
+      }
+      if (newBuff.millisecondsDuration > oldBuff.millisecondsDuration)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
+    {
+      // Config.MaxEffectStackSize
+      Buff newFood = Game1.buffsDisplay.food;
+      Buff newDrink = Game1.buffsDisplay.drink;
+      if (newFood != null)
+      {
+        if (PrevFood == null || !isNewSource(PrevFood, newFood))
+        {
+          PrevFood = newFood;
+          newFood = null;
+        }
+      }
+      if (newDrink != null)
+      {
+        if (PrevDrink == null)
+        {
+          PrevDrink = newDrink;
+          newDrink = null;
+        }
+        else if (isNewSource(PrevDrink, PrevDrink))
+        {
+
+        }
+      }
+    }
+
+    private void Log(object obj)
+    {
+      this.Monitor.Log(Newtonsoft.Json.JsonConvert.SerializeObject(obj), LogLevel.Info);
+    }
+  }
 }

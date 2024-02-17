@@ -1,0 +1,11 @@
+{
+    "Name": "Test",
+    "Author": "dcoun",
+    "Version": "1.0.0",
+    "Description": "Test Mod",
+    "UniqueID": "dcoun.test",
+    "EntryDll": "Test.dll",
+    "MinimumApiVersion": "3.0.0",
+    "UpdateKeys": []
+  }
+  

@@ -1,9 +1,11 @@
 {
-  "Name": "Food Buff Stack",
-  "Author": "dcoun08",
-  "Version": "1.0.0",
-  "Description": "Allows for buffs to stack",
-  "UniqueID": "dcoun08.foodbuffstack",
-  "EntryDll": "FoodBuffStack.dll",
-  "MinimumApiVersion": "4.0.0"
-}
+    "Name": "FoodBuffStack",
+    "Author": "dcoun",
+    "Version": "1.0.0",
+    "Description": "FoodBuffStack Mod",
+    "UniqueID": "dcoun.foodbuffstack",
+    "EntryDll": "FoodBuffStack.dll",
+    "MinimumApiVersion": "3.0.0",
+    "UpdateKeys": []
+  }
+  
