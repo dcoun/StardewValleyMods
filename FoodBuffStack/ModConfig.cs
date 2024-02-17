@@ -2,6 +2,6 @@ namespace FoodBuffStack
 {
   class ModConfig
   {
-    public int MaxEffectStackSize { get; set; } = 2;
+    public int MaxAttributesStackSize { get; set; } = 2;
   }
 }
