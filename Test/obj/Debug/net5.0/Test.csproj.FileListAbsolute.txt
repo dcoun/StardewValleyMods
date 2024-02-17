@@ -1,8 +1,0 @@
-G:\Github\StardewValleyMods\Test\obj\Debug\net5.0\Test.csproj.AssemblyReference.cache
-G:\Github\StardewValleyMods\Test\obj\Debug\net5.0\Test.GeneratedMSBuildEditorConfig.editorconfig
-G:\Github\StardewValleyMods\Test\obj\Debug\net5.0\Test.AssemblyInfoInputs.cache
-G:\Github\StardewValleyMods\Test\obj\Debug\net5.0\Test.AssemblyInfo.cs
-G:\Github\StardewValleyMods\Test\obj\Debug\net5.0\Test.csproj.CoreCompileInputs.cache
-G:\Github\StardewValleyMods\Test\bin\Debug\net5.0\Test.deps.json
-G:\Github\StardewValleyMods\Test\bin\Debug\net5.0\Test.dll
-G:\Github\StardewValleyMods\Test\obj\Debug\net5.0\Test.dll
