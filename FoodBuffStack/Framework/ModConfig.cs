@@ -1,6 +1,6 @@
-namespace FoodBuffStack
+namespace FoodBuffStack.Framework
 {
-  class ModConfig
+  public class ModConfig
   {
     public int MaxAttributesStackSize { get; set; } = 2;
   }

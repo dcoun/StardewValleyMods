@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using FoodBuffStack.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -43,7 +44,6 @@ namespace FoodBuffStack
       OnUpdate
     };
 
-    public static int MaxAttributesStackSize;
     public static STATUS EventStatus;
 
     string flag;
@@ -88,7 +88,7 @@ namespace FoodBuffStack
         buffAttributes = next.buffAttributes;
         effectStackCount = 1;
       }
-      else if (effectStackCount < MaxAttributesStackSize)
+      else if (effectStackCount < ModEntry.Config.MaxAttributesStackSize)
       {
         flag = "NewItem SameSource EffectStack";
         buffAttributes = Utils.ArrSum(
@@ -182,19 +182,43 @@ namespace FoodBuffStack
 
   public class ModEntry : Mod
   {
-    private static ModConfig Config;
+    public static ModConfig Config;
     private static BuffWrapper DrinkBuff = new BuffWrapper(BuffWrapper.TYPE.Drink);
     private static BuffWrapper FoodBuff = new BuffWrapper(BuffWrapper.TYPE.Food);
 
     public override void Entry(IModHelper helper)
     {
       Config = this.Helper.ReadConfig<ModConfig>();
-      BuffWrapper.MaxAttributesStackSize = Config.MaxAttributesStackSize;
       Utils.Monitor = this.Monitor;
 
+      helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
       helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
       helper.Events.GameLoop.DayStarted += this.OnDayStarted;
       helper.Events.GameLoop.DayEnding += this.OnDayEnding;
+    }
+
+    private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+    {
+      // get Generic Mod Config Menu's API (if it's installed)
+      var configMenu = this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+      if (configMenu is null)
+        return;
+
+      // register mod
+      configMenu.Register(
+          mod: this.ModManifest,
+          reset: () => ModEntry.Config = new ModConfig(),
+          save: () => this.Helper.WriteConfig(ModEntry.Config)
+      );
+
+      // add some config options
+      configMenu.AddNumberOption(
+          mod: this.ModManifest,
+          name: () => "MaxAttributesStackSize",
+          tooltip: () => "버프 Attributes 스택 크기",
+          getValue: () => ModEntry.Config.MaxAttributesStackSize,
+          setValue: value => ModEntry.Config.MaxAttributesStackSize = value
+      );
     }
 
     private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
