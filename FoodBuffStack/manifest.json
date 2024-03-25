@@ -1,11 +1,17 @@
 {
     "Name": "FoodBuffStack",
     "Author": "dcoun",
-    "Version": "1.0.0",
+    "Version": "1.1.0",
     "Description": "FoodBuffStack Mod",
     "UniqueID": "dcoun.foodbuffstack",
     "EntryDll": "FoodBuffStack.dll",
-    "MinimumApiVersion": "3.0.0",
-    "UpdateKeys": []
+    "MinimumApiVersion": "4.0.0",
+    "UpdateKeys": [],
+    "Dependencies": [
+      {
+        "UniqueID": "spacechase0.SpaceCore",
+        "IsRequired": true
+      }
+    ]
   }
   
