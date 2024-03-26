@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "Example\Example.csproj", "{1D8FD440-F764-4E0C-9AD7-C79566815C5C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FoodBuffStack", "FoodBuffStack\FoodBuffStack.csproj", "{CD891AA0-629C-4CE2-AE7C-90DC4719DCC4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D8FD440-F764-4E0C-9AD7-C79566815C5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D8FD440-F764-4E0C-9AD7-C79566815C5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D8FD440-F764-4E0C-9AD7-C79566815C5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D8FD440-F764-4E0C-9AD7-C79566815C5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD891AA0-629C-4CE2-AE7C-90DC4719DCC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD891AA0-629C-4CE2-AE7C-90DC4719DCC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD891AA0-629C-4CE2-AE7C-90DC4719DCC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD891AA0-629C-4CE2-AE7C-90DC4719DCC4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DB8692E3-96C1-4BB9-A670-12DAACA6573C}
+	EndGlobalSection
+EndGlobal

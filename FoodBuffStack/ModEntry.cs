@@ -1,19 +1,16 @@
 using System;
-using Microsoft.Xna.Framework;
 using FoodBuffStack.Framework;
-using SpaceCore;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
-using SObject = StardewValley.Object;
-using System.Linq;
 using StardewValley.Buffs;
+using SObject = StardewValley.Object;
 
 namespace FoodBuffStack
 {
   class Utils
   {
+    public static ModConfig Config;
     public static IMonitor Monitor;
 
     public static void Info(object obj)
@@ -26,17 +23,6 @@ namespace FoodBuffStack
       {
         Utils.Monitor.Log(obj.ToString(), LogLevel.Info);
       }
-    }
-
-    public static int[] ArrSum(int[] arr1, int[] arr2)
-    {
-      int[] result = new int[arr1.Length];
-      for (var i = 0; i < arr1.Length; i++)
-      {
-        result[i] = arr1[i] + arr2[i];
-      }
-
-      return result;
     }
   }
 
@@ -56,157 +42,151 @@ namespace FoodBuffStack
 
     public static STATUS EventStatus;
 
-    string flag;
     readonly TYPE type;
     Buff buff;
+    public string QualifiedItemId { get; set; }
     int effectStackCount = 1;
+
+    private readonly static object syncLock = new object();
 
     public BuffWrapper(TYPE type)
     {
       this.type = type;
     }
 
-    private bool IsSameSource(Buff next)
+    public string GetBuffId()
     {
-      return buff != null && next != null && buff.source == next.source;
+      return this.type == TYPE.Drink ? "drink" : "food";
     }
 
-    private bool IsNewItem(Buff next)
+    private void SetAppliedBuff()
     {
-      return buff == null || buff.id != next.id || !IsSameSource(next);
+      string buffId = this.GetBuffId();
+      if (Game1.player.buffs.AppliedBuffs.ContainsKey(buffId))
+      {
+        string prevSource = this.buff != null ? this.buff.source : null;
+        this.buff = Game1.player.buffs.AppliedBuffs[buffId];
+
+        if (this.buff == null || prevSource != this.buff.source)
+        {
+          // EndDuration or NewItem
+          this.effectStackCount = 1;
+        }
+      }
     }
 
     private Buff BuildNewBuff(Buff next)
     {
-      bool isSameSource = this.IsSameSource(next);
-      return next;
+      BuffEffects effects = buff.effects;
+      if (effectStackCount < Utils.Config.MaxAttributesStackSize)
+      {
+        effectStackCount++;
+        effects.Add(next.effects);
+      }
 
-      // // extends millisecondsDuration
-      // int millisecondsDuration = isSameSource
-      //   ? prev.millisecondsDuration + next.millisecondsDuration
-      //   : next.millisecondsDuration;
-      // int totalMillisecondsDuration = isSameSource
-      //   ? prev.totalMillisecondsDuration + next.totalMillisecondsDuration
-      //   : next.totalMillisecondsDuration;
-      // int minutesDuration = millisecondsDuration / 1000;
-      // int which = isSameSource ? prev.which : 1;
-
-      // // extends Attributes
-      // int[] buffAttributes;
-      // if (!isSameSource)
-      // {
-      //   flag = "NewItem";
-      //   buffAttributes = next.buffAttributes;
-      //   effectStackCount = 1;
-      // }
-      // else if (effectStackCount < ModEntry.Config.MaxAttributesStackSize)
-      // {
-      //   flag = "NewItem SameSource EffectStack";
-      //   buffAttributes = Utils.ArrSum(
-      //     prev.buffAttributes,
-      //     next.buffAttributes
-      //   );
-      //   effectStackCount++;
-      // }
-      // else
-      // {
-      //   flag = "NewItem SameSource";
-      //   buffAttributes = prev.buffAttributes;
-      // }
-
-      // Buff newBuff = new Buff(
-      //   buffAttributes[0],
-      //   buffAttributes[1],
-      //   buffAttributes[2],
-      //   buffAttributes[3],
-      //   buffAttributes[4],
-      //   buffAttributes[5],
-      //   buffAttributes[6],
-      //   buffAttributes[7],
-      //   buffAttributes[8],
-      //   buffAttributes[9],
-      //   buffAttributes[10],
-      //   buffAttributes[11],
-      //   minutesDuration: minutesDuration,
-      //   source: next.source,
-      //   displaySource: next.displaySource
-      // );
-      // newBuff.millisecondsDuration = millisecondsDuration;
-      // newBuff.totalMillisecondsDuration = totalMillisecondsDuration;
-      // newBuff.which = which;
-
-      // return newBuff;
+      return new Buff(
+        buff.id,
+        buff.source,
+        buff.displaySource,
+        buff.millisecondsDuration + next.millisecondsDuration,
+        buff.iconTexture,
+        buff.iconSheetIndex,
+        effects,
+        false,
+        buff.displayName,
+        buff.description
+      );
     }
 
-    public void ApplyBuff()
+    private void ApplyBuff()
     {
-      if (buff == null)
+      if (this.buff == null)
       {
         return;
       }
 
-      if (type == TYPE.Drink)
-      {
-        // Game1.buffsDisplay.tryToAddDrinkBuff(prev);
-      }
-      else
-      {
-        // Game1.buffsDisplay.tryToAddFoodBuff(prev, prev.millisecondsDuration / 1000);
-      }
+      Game1.player.applyBuff(this.buff);
     }
 
     public void ProcessNextBuff(Buff next)
     {
-      Utils.Info(next);
-      if (EventStatus == STATUS.DayEnding || (buff == null && next == null))
+      // TODO: 싱글쓰레드 보장이면 없어도됨
+      lock (BuffWrapper.syncLock)
+      {
+        if (EventStatus == STATUS.DayEnding || (EventStatus == STATUS.OnUpdate && next == null))
+        {
+          this.SetAppliedBuff();
+        }
+        else if (EventStatus == STATUS.DayStarted)
+        {
+          // 이전 buff가 있으면 player에게 적용
+          this.ApplyBuff();
+        }
+        else if (next != null)
+        {
+          // 새로운 buff
+          if (this.buff == null || this.buff.source != next.source)
+          {
+            this.SetAppliedBuff();
+          }
+          else if (this.buff.source == next.source)
+          {
+            this.buff = this.BuildNewBuff(next);
+            this.ApplyBuff();
+          }
+        }
+      }
+    }
+
+    public FoodBuffStackSave GetSaveData()
+    {
+      FoodBuffStackSave saveData = new FoodBuffStackSave();
+      if (this.buff != null)
+      {
+        saveData.QualifiedItemId = this.QualifiedItemId;
+        saveData.Duration = this.buff.millisecondsDuration;
+        saveData.IconSheetIndex = this.buff.iconSheetIndex;
+        saveData.EffectStackCount = this.effectStackCount;
+      }
+
+      return saveData;
+    }
+
+    public void LoadFromSaveData(FoodBuffStackSave saveData)
+    {
+      if (saveData.QualifiedItemId == null)
       {
         return;
       }
 
-      if (buff != null)
+      Item item = ItemRegistry.Create(saveData.QualifiedItemId, allowNull: true);
+      if (item == null)
       {
-        Utils.Info($"prevBuff {buff.source} {buff.getTimeLeft()}");
-        Utils.Info($"nextBuff {next.source} {next.getTimeLeft()}");
+        return;
+      }
 
-        if (buff.source != next.source)
+      foreach (Buff foodOrDrinkBuff in item.GetFoodOrDrinkBuffs())
+      {
+        BuffEffects effects = new BuffEffects();
+        for (int i = 0; i < saveData.EffectStackCount; i++)
         {
-          Buff b = Game1.player.buffs.AppliedBuffs[next.id];
-          buff = b;
+          effects.Add(foodOrDrinkBuff.effects);
+          this.effectStackCount++;
         }
-      }
-      else if (buff == null)
-      {
-        // 새로운 버프
-        Buff b = Game1.player.buffs.AppliedBuffs[next.id];
-        buff = b;
 
-        // buff = next;
-        Utils.Info($"prevBuff {buff.source} {buff.getTimeLeft()}");
-        Utils.Info($"nextBuff {next.source} {next.getTimeLeft()}");
-      }
-
-      if (buff != null && next == null)
-      {
-        flag = "EndDuration";
-        buff = null;
-        next = null;
-        effectStackCount = 1;
-      }
-      else if (IsNewItem(next))
-      {
-        // 새로운 음식을 먹은건지 판단이 불가해서 Buff의 which를 바꿔놓음
-        // prev = BuildNewBuff(next);
-        // ApplyBuff();
-      }
-
-      if (flag != null)
-      {
-        // Game1.buffsDisplay.syncIcons();
-        Utils.Monitor.Log($"{flag} {type}", LogLevel.Info);
-        Utils.Info(buff);
-        Utils.Info(next);
-        Utils.Info(effectStackCount);
-        flag = null;
+        this.buff = new Buff(
+          foodOrDrinkBuff.id,
+          foodOrDrinkBuff.source,
+          foodOrDrinkBuff.displaySource,
+          saveData.Duration,
+          foodOrDrinkBuff.iconTexture,
+          foodOrDrinkBuff.iconSheetIndex,
+          effects,
+          false,
+          foodOrDrinkBuff.displayName,
+          foodOrDrinkBuff.description
+        );
+        this.ApplyBuff();
       }
     }
   }
@@ -214,12 +194,10 @@ namespace FoodBuffStack
   public class ModEntry : Mod
   {
     /// <summary>The mod configuration.</summary>
-    private ModConfig Config;
+    public ModConfig Config;
 
     private BuffWrapper DrinkBuff = new(BuffWrapper.TYPE.Drink);
-    private BuffWrapper FoodBuff = new(BuffWrapper.TYPE.Drink);
-
-    private static System.Collections.Generic.IDictionary<string, Buff> PrevBuffs;
+    private BuffWrapper FoodBuff = new(BuffWrapper.TYPE.Food);
 
     public override void Entry(IModHelper helper)
     {
@@ -227,8 +205,12 @@ namespace FoodBuffStack
       Utils.Monitor = this.Monitor;
 
       helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+      helper.Events.GameLoop.OneSecondUpdateTicked += this.OnOneSecondUpdateTicked;
       helper.Events.GameLoop.DayStarted += this.OnDayStarted;
       helper.Events.GameLoop.DayEnding += this.OnDayEnding;
+
+      helper.Events.GameLoop.Saved += this.OnSaved;
+      helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
     }
 
     private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -252,6 +234,7 @@ namespace FoodBuffStack
             getValue: () => this.Config.MaxAttributesStackSize,
             setValue: value => this.Config.MaxAttributesStackSize = value
         );
+        Utils.Config = this.Config;
       }
 
       ISpaceCoreApi spaceCoreApi = this.Helper.ModRegistry.GetApi<ISpaceCoreApi>("spacechase0.SpaceCore");
@@ -274,36 +257,65 @@ namespace FoodBuffStack
         {
           if (foodOrDrinkBuff.id == "drink")
           {
+            DrinkBuff.QualifiedItemId = @object.QualifiedItemId;
             DrinkBuff.ProcessNextBuff(foodOrDrinkBuff);
           }
           else if (foodOrDrinkBuff.id == "food")
           {
+            FoodBuff.QualifiedItemId = @object.QualifiedItemId;
             FoodBuff.ProcessNextBuff(foodOrDrinkBuff);
           }
-
-          // Buff nextBuff = Game1.player.buffs.AppliedBuffs[foodOrDrinkBuff.id];
-
-
-          // Utils.Info($"HasBuff: {Game1.player.hasBuff(foodOrDrinkBuff.id)}");
-          // Buff prev = Game1.player.buffs.AppliedBuffs[foodOrDrinkBuff.id];
-
-          // Utils.Info($"next id: {foodOrDrinkBuff.id} source: {foodOrDrinkBuff.source}");
-          // Utils.Info($"prev id: {prev.id} source: {prev.source}");
-          // Utils.Info(Game1.player.buffs.AppliedBuffIds.ToArray());
         }
+      }
+    }
+
+    private void OnOneSecondUpdateTicked(object sender, OneSecondUpdateTickedEventArgs e)
+    {
+      if (Context.IsWorldReady)
+      {
+        BuffWrapper.EventStatus = BuffWrapper.STATUS.OnUpdate;
+        DrinkBuff.ProcessNextBuff(null);
+        FoodBuff.ProcessNextBuff(null);
       }
     }
 
     private void OnDayStarted(object sender, DayStartedEventArgs e)
     {
       BuffWrapper.EventStatus = BuffWrapper.STATUS.DayStarted;
-      // DrinkBuff.ApplyBuff();
-      // FoodBuff.ApplyBuff();
+      DrinkBuff.ProcessNextBuff(null);
+      FoodBuff.ProcessNextBuff(null);
     }
 
     private void OnDayEnding(object sender, DayEndingEventArgs e)
     {
       BuffWrapper.EventStatus = BuffWrapper.STATUS.DayEnding;
+      DrinkBuff.ProcessNextBuff(null);
+      FoodBuff.ProcessNextBuff(null);
+    }
+
+    private string GetSaveDataFileName()
+    {
+      return $"FoodBuffStackLast-{Game1.player.Name}-{Game1.player.farmName}.json";
+    }
+
+    private void OnSaved(object sender, SavedEventArgs e)
+    {
+      FoodBuffStackSaveData saveData = new FoodBuffStackSaveData
+      {
+        Drink = this.DrinkBuff.GetSaveData(),
+        Food = this.FoodBuff.GetSaveData()
+      };
+      this.Helper.Data.WriteJsonFile(GetSaveDataFileName(), saveData);
+    }
+
+    private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
+    {
+      FoodBuffStackSaveData data = this.Helper.Data.ReadJsonFile<FoodBuffStackSaveData>(GetSaveDataFileName());
+      if (data != null)
+      {
+        DrinkBuff.LoadFromSaveData(data.Drink);
+        FoodBuff.LoadFromSaveData(data.Food);
+      }
     }
   }
 }

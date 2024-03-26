@@ -10,7 +10,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.1.1" />
     <Reference Include="SpaceCore">
-			<HintPath>D:\games\SteamLibrary\steamapps\common\Stardew Valley\Mods\[AFM] SpaceCore\SpaceCore.dll</HintPath>
+			<HintPath>./SpaceCore.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
   </ItemGroup>
