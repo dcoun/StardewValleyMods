@@ -45,7 +45,7 @@ namespace FoodBuffStack
     readonly TYPE type;
     Buff buff;
     public string QualifiedItemId { get; set; }
-    int effectStackCount = 1;
+    int effectStackCount = 0;
 
     private readonly static object syncLock = new object();
 
@@ -70,7 +70,7 @@ namespace FoodBuffStack
         if (this.buff == null || prevSource != this.buff.source)
         {
           // EndDuration or NewItem
-          this.effectStackCount = 1;
+          this.effectStackCount = 0;
         }
       }
     }
@@ -80,7 +80,7 @@ namespace FoodBuffStack
       BuffEffects effects = buff.effects;
       if (effectStackCount < Utils.Config.MaxAttributesStackSize)
       {
-        effectStackCount++;
+        this.effectStackCount++;
         effects.Add(next.effects);
       }
 
@@ -170,8 +170,8 @@ namespace FoodBuffStack
         BuffEffects effects = new BuffEffects();
         for (int i = 0; i < saveData.EffectStackCount; i++)
         {
-          effects.Add(foodOrDrinkBuff.effects);
           this.effectStackCount++;
+          effects.Add(foodOrDrinkBuff.effects);
         }
 
         this.buff = new Buff(
