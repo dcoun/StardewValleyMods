@@ -35,3 +35,4 @@
 **/obj/
 
 .history
+.DS_Store
