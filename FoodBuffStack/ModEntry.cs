@@ -67,9 +67,16 @@ namespace FoodBuffStack
         string prevSource = this.buff != null ? this.buff.source : null;
         this.buff = Game1.player.buffs.AppliedBuffs[buffId];
 
-        if (this.buff == null || prevSource != this.buff.source)
+        if (this.buff == null || this.buff.millisecondsDuration <= 0)
         {
-          // EndDuration or NewItem
+          // EndDuration
+          this.QualifiedItemId = null;
+          this.buff = null;
+          this.effectStackCount = 0;
+        }
+        else if (prevSource != this.buff.source)
+        {
+          // NewItem
           this.effectStackCount = 0;
         }
       }
@@ -141,7 +148,7 @@ namespace FoodBuffStack
     public FoodBuffStackSave GetSaveData()
     {
       FoodBuffStackSave saveData = new FoodBuffStackSave();
-      if (this.buff != null)
+      if (this.buff != null && this.QualifiedItemId != null && this.buff.millisecondsDuration > 0)
       {
         saveData.QualifiedItemId = this.QualifiedItemId;
         saveData.Duration = this.buff.millisecondsDuration;
@@ -154,7 +161,7 @@ namespace FoodBuffStack
 
     public void LoadFromSaveData(FoodBuffStackSave saveData)
     {
-      if (saveData.QualifiedItemId == null)
+      if (saveData.QualifiedItemId == null || saveData.Duration <= 0)
       {
         return;
       }
@@ -164,7 +171,8 @@ namespace FoodBuffStack
       {
         return;
       }
-
+      
+      this.QualifiedItemId = saveData.QualifiedItemId;
       foreach (Buff foodOrDrinkBuff in item.GetFoodOrDrinkBuffs())
       {
         BuffEffects effects = new BuffEffects();
