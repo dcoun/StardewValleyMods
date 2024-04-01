@@ -59,7 +59,7 @@ namespace FoodBuffStack
       return this.type == TYPE.Drink ? "drink" : "food";
     }
 
-    private void SetNullBuff()
+    public void SetNullBuff()
     {
       this.QualifiedItemId = null;
       this.buff = null;
@@ -226,6 +226,7 @@ namespace FoodBuffStack
 
       helper.Events.GameLoop.Saved += this.OnSaved;
       helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+      helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
     }
 
     private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -331,6 +332,12 @@ namespace FoodBuffStack
         DrinkBuff.LoadFromSaveData(data.Drink);
         FoodBuff.LoadFromSaveData(data.Food);
       }
+    }
+
+    private void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
+    {
+      DrinkBuff.SetNullBuff();
+      FoodBuff.SetNullBuff();
     }
   }
 }
