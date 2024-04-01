@@ -59,26 +59,33 @@ namespace FoodBuffStack
       return this.type == TYPE.Drink ? "drink" : "food";
     }
 
+    private void SetNullBuff()
+    {
+      this.QualifiedItemId = null;
+      this.buff = null;
+      this.effectStackCount = 0;
+    }
+
     private void SetAppliedBuff()
     {
       string buffId = this.GetBuffId();
-      if (Game1.player.buffs.AppliedBuffs.ContainsKey(buffId))
-      {
-        string prevSource = this.buff != null ? this.buff.source : null;
-        this.buff = Game1.player.buffs.AppliedBuffs[buffId];
+      string prevSource = this.buff != null ? this.buff.source : null;
+      Buff next = Game1.player.buffs.AppliedBuffs.ContainsKey(buffId)
+        ? Game1.player.buffs.AppliedBuffs[buffId]
+        : null;
 
-        if (this.buff == null || this.buff.millisecondsDuration <= 0)
+      if (next != null && next.millisecondsDuration > 0)
+      {
+        if (prevSource != next.source)
         {
-          // EndDuration
-          this.QualifiedItemId = null;
-          this.buff = null;
           this.effectStackCount = 0;
         }
-        else if (prevSource != this.buff.source)
-        {
-          // NewItem
-          this.effectStackCount = 0;
-        }
+        this.buff = next;
+      }
+      else if (this.buff != null)
+      {
+        // EndDuration
+        this.SetNullBuff();
       }
     }
 
@@ -171,7 +178,7 @@ namespace FoodBuffStack
       {
         return;
       }
-      
+
       this.QualifiedItemId = saveData.QualifiedItemId;
       foreach (Buff foodOrDrinkBuff in item.GetFoodOrDrinkBuffs())
       {
