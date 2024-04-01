@@ -16,10 +16,16 @@ namespace CarryChest.Framework
     {
       // We're checking the `.ParentSheetIndex` instead of `is Chest` because when you break a chest
       // and pick it up it isn't a chest instance, it's just an object with the chest index.
+      // - 130: Chest
+      // - 232: Stone Chest
+      // - 304: Big Chest
+      // - 328: Big Stone Chest
+      // - 256: Junimo Chest
+      // - 216: Mini-Fridge
       return
           item is SObject obj
           && obj.bigCraftable.Value
-          && (obj.ParentSheetIndex is 130 or 232 or 304) // chest or stone chest
+          && (obj.ParentSheetIndex is 130 or 232 or 304 or 328) // chest or stone chest
           && (obj is not Chest chest || chest.playerChest.Value);
     }
   }
