@@ -92,7 +92,7 @@ namespace FoodBuffStack
     private Buff BuildNewBuff(Buff next)
     {
       BuffEffects effects = buff.effects;
-      if (effectStackCount < Utils.Config.MaxAttributesStackSize)
+      if (effectStackCount < Utils.Config.MaxAttributesStackSize - 1)
       {
         this.effectStackCount++;
         effects.Add(next.effects);
