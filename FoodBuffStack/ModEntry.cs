@@ -127,14 +127,18 @@ namespace FoodBuffStack
       // TODO: 싱글쓰레드 보장이면 없어도됨
       lock (BuffWrapper.syncLock)
       {
-        if (EventStatus == STATUS.DayEnding || (EventStatus == STATUS.OnUpdate && next == null))
+        if (EventStatus == STATUS.DayEnding)
         {
-          this.SetAppliedBuff();
+          return;
         }
         else if (EventStatus == STATUS.DayStarted)
         {
           // 이전 buff가 있으면 player에게 적용
           this.ApplyBuff();
+        }
+        else if (EventStatus == STATUS.OnUpdate && next == null)
+        {
+          this.SetAppliedBuff();
         }
         else if (next != null)
         {

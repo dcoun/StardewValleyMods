@@ -1,7 +1,7 @@
 {
     "Name": "FoodBuffStack",
     "Author": "dcoun",
-    "Version": "1.1.0",
+    "Version": "1.1.1",
     "Description": "FoodBuffStack Mod",
     "UniqueID": "dcoun.foodbuffstack",
     "EntryDll": "FoodBuffStack.dll",
