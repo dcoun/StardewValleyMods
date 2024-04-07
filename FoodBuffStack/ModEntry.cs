@@ -187,7 +187,7 @@ namespace FoodBuffStack
       foreach (Buff foodOrDrinkBuff in item.GetFoodOrDrinkBuffs())
       {
         BuffEffects effects = new BuffEffects();
-        for (int i = 0; i < saveData.EffectStackCount; i++)
+        for (int i = 0; i < saveData.EffectStackCount + 1; i++)
         {
           this.effectStackCount++;
           effects.Add(foodOrDrinkBuff.effects);
